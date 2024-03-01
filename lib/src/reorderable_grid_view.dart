@@ -258,6 +258,7 @@ class ReorderableGridView extends StatefulWidget {
     this.proxyDecorator,
     this.autoScroll,
     this.onReorderStart,
+    this.onReorderEnd,
   })  : assert(
           children.every((Widget w) => w.key != null),
           'All children of this widget must have a key.',
@@ -309,6 +310,7 @@ class ReorderableGridView extends StatefulWidget {
     this.proxyDecorator,
     this.autoScroll,
     this.onReorderStart,
+    this.onReorderEnd,
   })  : assert(itemCount >= 0),
         super(key: key);
 
@@ -352,6 +354,7 @@ class ReorderableGridView extends StatefulWidget {
     this.proxyDecorator,
     this.autoScroll,
     this.onReorderStart,
+    this.onReorderEnd,
   })  : gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
           mainAxisSpacing: mainAxisSpacing,
@@ -406,6 +409,7 @@ class ReorderableGridView extends StatefulWidget {
     this.proxyDecorator,
     this.autoScroll,
     this.onReorderStart,
+    this.onReorderEnd,
   })  : gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: maxCrossAxisExtent,
           mainAxisSpacing: mainAxisSpacing,
@@ -486,6 +490,9 @@ class ReorderableGridView extends StatefulWidget {
   /// {@macro flutter.widgets.reorderable_list.onReorderStart}
   final void Function(int index)? onReorderStart;
 
+  /// {@macro flutter.widgets.reorderable_list.onReorderEnd}
+  final void Function(bool reordered)? onReorderEnd;
+
   /// {@macro flutter.widgets.reorderable_list.proxyDecorator}
   final ReorderItemProxyDecorator? proxyDecorator;
 
@@ -508,8 +515,7 @@ class ReorderableGridViewState extends State<ReorderableGridView> {
     }
 
     // First, determine which semantics actions apply.
-    final Map<CustomSemanticsAction, VoidCallback> semanticsActions =
-        <CustomSemanticsAction, VoidCallback>{};
+    final Map<CustomSemanticsAction, VoidCallback> semanticsActions = <CustomSemanticsAction, VoidCallback>{};
 
     // Create the appropriate semantics actions.
     void moveToStart() => reorder(index, 0);
@@ -519,37 +525,26 @@ class ReorderableGridViewState extends State<ReorderableGridView> {
     // before index+2, which is after the space at index+1.
     void moveAfter() => reorder(index, index + 2);
 
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     // If the item can move to before its current position in the grid.
     if (index > 0) {
-      semanticsActions[
-              CustomSemanticsAction(label: localizations.reorderItemToStart)] =
-          moveToStart;
+      semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToStart)] = moveToStart;
       String reorderItemBefore = localizations.reorderItemUp;
       if (widget.scrollDirection == Axis.horizontal) {
-        reorderItemBefore = Directionality.of(context) == TextDirection.ltr
-            ? localizations.reorderItemLeft
-            : localizations.reorderItemRight;
+        reorderItemBefore = Directionality.of(context) == TextDirection.ltr ? localizations.reorderItemLeft : localizations.reorderItemRight;
       }
-      semanticsActions[CustomSemanticsAction(label: reorderItemBefore)] =
-          moveBefore;
+      semanticsActions[CustomSemanticsAction(label: reorderItemBefore)] = moveBefore;
     }
 
     // If the item can move to after its current position in the grid.
     if (index < widget.itemCount - 1) {
       String reorderItemAfter = localizations.reorderItemDown;
       if (widget.scrollDirection == Axis.horizontal) {
-        reorderItemAfter = Directionality.of(context) == TextDirection.ltr
-            ? localizations.reorderItemRight
-            : localizations.reorderItemLeft;
+        reorderItemAfter = Directionality.of(context) == TextDirection.ltr ? localizations.reorderItemRight : localizations.reorderItemLeft;
       }
-      semanticsActions[CustomSemanticsAction(label: reorderItemAfter)] =
-          moveAfter;
-      semanticsActions[
-              CustomSemanticsAction(label: localizations.reorderItemToEnd)] =
-          moveToEnd;
+      semanticsActions[CustomSemanticsAction(label: reorderItemAfter)] = moveAfter;
+      semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToEnd)] = moveToEnd;
     }
 
     // We pass toWrap with a GlobalKey into the item so that when it
@@ -578,8 +573,7 @@ class ReorderableGridViewState extends State<ReorderableGridView> {
     }());
 
     final Widget itemWithSemantics = _wrapWithSemantics(item, index);
-    final Key itemGlobalKey =
-        _ReorderableGridViewChildGlobalKey(item.key!, this);
+    final Key itemGlobalKey = _ReorderableGridViewChildGlobalKey(item.key!, this);
     final bool enable = widget.itemDragEnable(index);
 
     switch (Theme.of(context).platform) {
@@ -646,9 +640,9 @@ class ReorderableGridViewState extends State<ReorderableGridView> {
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
             onReorderStart: widget.onReorderStart,
+            onReorderEnd: widget.onReorderEnd,
             proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
-            autoScroll: widget.autoScroll ??
-                widget.physics is! NeverScrollableScrollPhysics,
+            autoScroll: widget.autoScroll ?? widget.physics is! NeverScrollableScrollPhysics,
             scrollDirection: widget.scrollDirection,
             reverse: widget.reverse,
           ),
@@ -665,8 +659,7 @@ class ReorderableGridViewState extends State<ReorderableGridView> {
 // of the objects used to generate widgets.
 @optionalTypeArgs
 class _ReorderableGridViewChildGlobalKey extends GlobalObjectKey {
-  const _ReorderableGridViewChildGlobalKey(this.subKey, this.state)
-      : super(subKey);
+  const _ReorderableGridViewChildGlobalKey(this.subKey, this.state) : super(subKey);
 
   final Key subKey;
   final State state;
@@ -676,9 +669,7 @@ class _ReorderableGridViewChildGlobalKey extends GlobalObjectKey {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _ReorderableGridViewChildGlobalKey &&
-        other.subKey == subKey &&
-        other.state == state;
+    return other is _ReorderableGridViewChildGlobalKey && other.subKey == subKey && other.state == state;
   }
 
   @override
