@@ -267,6 +267,7 @@ class ReorderableGridState extends State<ReorderableGrid> {
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
             onReorderStart: widget.onReorderStart,
+            onReorderEnd: widget.onReorderEnd,
             proxyDecorator: widget.proxyDecorator,
             reverse: widget.reverse,
             autoScroll: widget.autoScroll ?? widget.physics is! NeverScrollableScrollPhysics,
