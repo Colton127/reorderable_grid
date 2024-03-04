@@ -54,6 +54,7 @@ class ReorderableGrid extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.autoScroll,
     this.onReorderStart,
+    this.onReorderEnd,
   })  : assert(itemCount >= 0),
         super(key: key);
 
@@ -77,6 +78,9 @@ class ReorderableGrid extends StatefulWidget {
 
   /// {@macro flutter.widgets.reorderable_list.onReorderStart}
   final void Function(int index)? onReorderStart;
+
+  /// {@macro flutter.widgets.reorderable_list.onReorderEnd}
+  final void Function(bool reordered)? onReorderEnd;
 
   /// {@macro flutter.widgets.reorderable_list.proxyDecorator}
   final ReorderItemProxyDecorator? proxyDecorator;
